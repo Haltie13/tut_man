@@ -1,8 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:tutoring_management/add_event_example.dart';
 import 'package:tutoring_management/screens/add_meeting_screen.dart';
-import '/screens/meetings_tab.dart';
 import '/model/meeting.dart';
+import 'meetings_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   @override
@@ -27,7 +27,7 @@ class HomeScreen extends StatelessWidget {
       tabBuilder: (BuildContext context, int index) {
         switch (index) {
           case 0:
-            return MeetingsCupertinoList(meetings: sampleMeetings);
+            return MeetingsScreen();
           case 1:
             return AddMeetingScreen();
           default:
