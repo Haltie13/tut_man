@@ -40,7 +40,7 @@ class DatabaseHelper {
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         startTime TEXT NOT NULL,
         duration INTEGER NOT NULL,
-        eventId String,
+        eventId TEXT,
         studentId INTEGER NOT NULL,
         price TEXT NOT NULL,
         payed INTEGER NOT NULL,

@@ -10,8 +10,14 @@ class MeetingsCupertinoList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
-      navigationBar: const CupertinoNavigationBar(
-        middle: Text('Meetings'),
+      navigationBar: CupertinoNavigationBar(
+        middle: const Text('Meetings'),
+        trailing: CupertinoButton(
+            child: const Icon(CupertinoIcons.add),
+            onPressed: () {
+              Navigator.push(context,
+              CupertinoPageRoute(builder: (_) => AddMeetingScreen()));
+            }),
       ),
       child: ListView.builder(
         itemCount: meetings.length,
