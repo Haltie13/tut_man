@@ -44,8 +44,14 @@ class CalendarManager {
     }
   }
   
-  Future<void> removeEventFromCalendar(String eventId) async {
-    Calendar? calendar = await _defaultCalendar();
+  Future<void> removeEventFromCalendar(String eventId, {bool defaultCalendar = true}) async {
+    Calendar? calendar;
+    if (defaultCalendar) {
+       calendar = await _defaultCalendar();
+    } else {
+    //   Need to change later to chosen Calendar
+      calendar = await _defaultCalendar();
+    }
     try {
       _plugin.deleteEvent(calendar?.id, eventId);
     } catch (e) {
