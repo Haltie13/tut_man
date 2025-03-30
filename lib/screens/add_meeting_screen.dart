@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:device_calendar/device_calendar.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:tutoring_management/model/database_helper.dart';
 import 'package:tutoring_management/model/meeting_provider.dart';
@@ -42,7 +43,7 @@ class _AddMeetingScreenState extends State<AddMeetingScreen> {
 
   final TextEditingController _descriptionController = TextEditingController();
   var studentProvider;
-  late CalendarManager calendarManager;
+  final CalendarManager calendarManager = CalendarManager();
 
   @override
   void initState() {
@@ -84,6 +85,12 @@ class _AddMeetingScreenState extends State<AddMeetingScreen> {
         context, listen: false);
     final student = studentProvider.getStudent(studentId);
     final studentName = student != null ? student.name : 'Tutoring';
+    if (eventId != null) {
+      calendarManager.removeEventFromCalendar(eventId!, defaultCalendar: true);
+      if (kDebugMode) {
+        print('Deleted event with id $eventId');
+      }
+    }
     eventId = await calendarManager.addEventToCalendar(title: studentName,
         startTime: startDateTime,
         duration: duration,
