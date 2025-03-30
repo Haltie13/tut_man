@@ -11,20 +11,20 @@ class MeetingProvider extends ChangeNotifier {
 
   Future<void> loadMeetings() async {
     final db = await _dbHelper.database;
-    final data = await db.query('Meetings');
+    final data = await db.query('Meeting');
     _meetings = data.map((m) => Meeting.fromMap(m)).toList();
     notifyListeners();
   }
 
   Future<void> addOrUpdate(Meeting meeting) async {
     final db = await _dbHelper.database;
-    db.insert('Meetings', meeting.toMap(), conflictAlgorithm: ConflictAlgorithm.replace);
+    db.insert('Meeting', meeting.toMap(), conflictAlgorithm: ConflictAlgorithm.replace);
     loadMeetings();
   }
 
   Future<void> delete(int id) async {
     final db = await _dbHelper.database;
-    db.delete('Meetings', where: 'id = ?', whereArgs: [id]);
+    db.delete('Meeting', where: 'id = ?', whereArgs: [id]);
     loadMeetings();
   }
 }

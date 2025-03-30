@@ -2,6 +2,8 @@ PODS:
   - device_calendar (0.0.1):
     - Flutter
   - Flutter (1.0.0)
+  - flutter_native_timezone (0.0.1):
+    - Flutter
   - permission_handler_apple (9.3.0):
     - Flutter
   - sqflite_darwin (0.0.4):
@@ -11,6 +13,7 @@ PODS:
 DEPENDENCIES:
   - device_calendar (from `.symlinks/plugins/device_calendar/ios`)
   - Flutter (from `Flutter`)
+  - flutter_native_timezone (from `.symlinks/plugins/flutter_native_timezone/ios`)
   - permission_handler_apple (from `.symlinks/plugins/permission_handler_apple/ios`)
   - sqflite_darwin (from `.symlinks/plugins/sqflite_darwin/darwin`)
 
@@ -19,6 +22,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/device_calendar/ios"
   Flutter:
     :path: Flutter
+  flutter_native_timezone:
+    :path: ".symlinks/plugins/flutter_native_timezone/ios"
   permission_handler_apple:
     :path: ".symlinks/plugins/permission_handler_apple/ios"
   sqflite_darwin:
@@ -27,6 +32,7 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   device_calendar: b55b2c5406cfba45c95a59f9059156daee1f74ed
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
+  flutter_native_timezone: 5fe32678d72d1894880e94303ef41c2919f014e5
   permission_handler_apple: 4ed2196e43d0651e8ff7ca3483a069d469701f2d
   sqflite_darwin: 20b2a3a3b70e43edae938624ce550a3cbf66a3d0
 
