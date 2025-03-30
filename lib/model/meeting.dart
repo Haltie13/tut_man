@@ -6,7 +6,7 @@ class Meeting {
   final int? id;
   final TZDateTime startTime;
   final int duration; // minutes
-  final String? eventId;
+  String? eventId;
   final int studentId;
   final Decimal price;
   final bool isPayed;
