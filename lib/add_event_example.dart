@@ -1,8 +1,9 @@
 import 'package:device_calendar/device_calendar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:timezone/data/latest.dart' as tz;
+import 'package:timezone/data/latest.dart' as tz_data;
 import 'package:timezone/timezone.dart' as tz;
+
 
 class AddEventExample extends StatelessWidget {
   const AddEventExample({super.key});
@@ -12,11 +13,7 @@ class AddEventExample extends StatelessWidget {
     return CupertinoPageScaffold(
         child: Center(
           child: CupertinoButton.filled(
-              onPressed: () => addEventToCalendar(
-                  title: "Gówno z dupy",
-                  description: "Leci",
-                  startDate: TZDateTime.now(tz.local),
-                  endDate: TZDateTime.now(tz.local).add(Duration(hours: 1))),
+              onPressed: () => (),
               child: Icon(
                 CupertinoIcons.add,
                 color: CupertinoTheme.of(context).primaryContrastingColor,
@@ -30,6 +27,9 @@ class AddEventExample extends StatelessWidget {
     required TZDateTime startDate,
     required TZDateTime endDate,
   }) async {
+    print('AEEL ${tz.local}, ${tz.TZDateTime.now(tz.local)}');
+    print(startDate);
+    print(startDate.location);
     final DeviceCalendarPlugin _calendarPlugin = DeviceCalendarPlugin();
 
     var permissionStatusFull = await Permission.calendarFullAccess.status;
@@ -52,7 +52,6 @@ class AddEventExample extends StatelessWidget {
         print("Kalendarz: ${calendar.name}, ID: ${calendar.id}");
       }
 
-
       final event = Event(
         calendar.id,
         title: title,
@@ -71,4 +70,6 @@ class AddEventExample extends StatelessWidget {
       print("Brak dostępnych kalendarzy.");
     }
   }
+
+
 }

@@ -44,7 +44,8 @@ dependencies:
   decimal: ^3.0.2
   provider: ^6.1.2
   syncfusion_flutter_datepicker: ^28.2.11+1
-  flutter_native_timezone: ^2.0.0
+  flutter_timezone: ^4.1.0
+
 
 
 dev_dependencies:

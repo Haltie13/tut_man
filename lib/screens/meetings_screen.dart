@@ -15,6 +15,17 @@ class MeetingsScreen extends StatelessWidget {
     return CupertinoPageScaffold(
         navigationBar: CupertinoNavigationBar(
           middle: const Text('Meetings'),
+          trailing: CupertinoButton(
+              onPressed: () {
+                Navigator.of(context).push(CupertinoPageRoute(
+                    fullscreenDialog: true,
+                    builder: (context) => AddMeetingScreen()));
+              },
+              padding: EdgeInsets.zero,
+              child: Icon(
+                CupertinoIcons.plus,
+                size: 30,
+              )),
         ),
         child: SafeArea(child: Consumer2<MeetingProvider, StudentProvider>(
             builder: (context, meetingProvider, studentProvider, child) {
@@ -45,7 +56,7 @@ class MeetingsScreen extends StatelessWidget {
             ),
             child: Center(
               child: Text(
-                DateFormat('HH:mm').format(meeting.startTime),
+                DateFormat('HH:mm').format(meeting.startTime.toLocal()),
                 style: CupertinoTheme.of(context)
                     .textTheme
                     .textStyle
@@ -83,7 +94,11 @@ class MeetingsScreen extends StatelessWidget {
             ],
           ),
           onTap: () {
-            // You can implement meeting details/edit navigation here
+            Navigator.of(context).push(CupertinoPageRoute(
+                fullscreenDialog: true,
+                builder: (context) => AddMeetingScreen(
+                      meeting: meeting,
+                    )));
           },
         );
       },
