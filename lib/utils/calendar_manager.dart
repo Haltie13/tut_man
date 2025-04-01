@@ -8,7 +8,7 @@ import '../model/student.dart';
 import '../model/student_provider.dart';
 
 class CalendarManager {
-  final DeviceCalendarPlugin _plugin = DeviceCalendarPlugin();
+  final DeviceCalendarPlugin _plugin = DeviceCalendarPlugin(shouldInitTimezone: false);
 
   CalendarManager();
 

@@ -1,5 +1,5 @@
 import 'dart:io';
-
+import 'package:timezone/data/latest.dart' as tz;
 import 'package:device_calendar/device_calendar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -27,9 +27,9 @@ class AddMeetingScreen extends StatefulWidget {
 
 class _AddMeetingScreenState extends State<AddMeetingScreen> {
   final _formKey = GlobalKey<FormState>();
-  int? meetingId = -1;
+  int? meetingId;
   int? studentId = -1;
-  late TZDateTime startDateTime = getCurrentRoundDateTime();
+  TZDateTime startDateTime = getCurrentRoundDateTime();
   int duration = 60;
   String? eventId;
   Decimal price = Decimal.zero;
@@ -49,6 +49,7 @@ class _AddMeetingScreenState extends State<AddMeetingScreen> {
   void initState() {
     super.initState();
     studentProvider = Provider.of<StudentProvider>(context, listen: false);
+    startDateTime = widget.meeting?.startTime ?? getCurrentRoundDateTime();
     if (widget.meeting != null) {
       meetingId = widget.meeting!.id;
       studentId = widget.meeting!.studentId;
@@ -95,7 +96,9 @@ class _AddMeetingScreenState extends State<AddMeetingScreen> {
         startTime: startDateTime,
         duration: duration,
         description: description);
-    Meeting meeting = Meeting(startTime: startDateTime,
+    Meeting meeting = Meeting(
+      id: meetingId,
+        startTime: startDateTime,
         duration: duration,
         studentId: studentId!,
         eventId: eventId,
@@ -193,9 +196,9 @@ class _AddMeetingScreenState extends State<AddMeetingScreen> {
                     prefix: Text('Time'),
                     controller: TextEditingController(
                         text:
-                        '${timeFormat.format(startDateTime)} - ${timeFormat
+                        '${timeFormat.format(startDateTime.toLocal())} - ${timeFormat
                             .format(
-                            startDateTime.add(Duration(minutes: duration)))}'),
+                            startDateTime.add(Duration(minutes: duration)).toLocal()) }'),
                     onTap: () async {
                       showCupertinoModalPopup(
                         context: context,
@@ -207,10 +210,17 @@ class _AddMeetingScreenState extends State<AddMeetingScreen> {
                                   context),
                               child: Column(
                                 children: [
+                                  CupertinoButton(
+                                    child: Text("Done"),
+                                    onPressed: () {
+                                      Navigator.pop(
+                                          context); // Close the picker
+                                    },
+                                  ),
                                   Expanded(
                                     child: CupertinoDatePicker(
                                       mode: CupertinoDatePickerMode.time,
-                                      initialDateTime: startDateTime,
+                                      initialDateTime: startDateTime.toLocal(),
                                       use24hFormat: true,
                                       onDateTimeChanged: (DateTime newTime) {
                                         setState(() {
@@ -225,13 +235,7 @@ class _AddMeetingScreenState extends State<AddMeetingScreen> {
                                       },
                                     ),
                                   ),
-                                  CupertinoButton(
-                                    child: Text("Done"),
-                                    onPressed: () {
-                                      Navigator.pop(
-                                          context); // Close the picker
-                                    },
-                                  ),
+
                                 ],
                               ),
                             ),
