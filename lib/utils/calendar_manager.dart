@@ -69,4 +69,9 @@ class CalendarManager {
       orElse: () => calendars.first,
     );
   }
+
+  Future<void>  createCalendar()  async {
+    final calendarName = await _plugin.createCalendar('Masakra');
+    print(calendarName.data);
+  }
 }

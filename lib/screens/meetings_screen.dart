@@ -37,70 +37,144 @@ class MeetingsScreen extends StatelessWidget {
         })));
   }
 
+// A helper class to represent either a date header or a meeting
+
   Widget _meetingsList(BuildContext context, List<Meeting> meetings,
       StudentProvider studentProvider) {
+    meetings.sort((a, b) => a.startTime.compareTo(b.startTime));
+
+    final Map<String, List<Meeting>> groupedByDate = {};
+    for (final meeting in meetings) {
+      final dateKey = DateFormat('yyyy-MM-dd')
+          .format(meeting.startTime.toLocal());
+      groupedByDate.putIfAbsent(dateKey, () => []).add(meeting);
+    }
+
+    final sortedDateKeys = groupedByDate.keys.toList()
+      ..sort((a, b) => a.compareTo(b));
+
+    final List<_ListItem> items = [];
+
+    for (final dateKey in sortedDateKeys) {
+      final dateObj = DateTime.parse(dateKey);
+      final dateHeaderText = DateFormat('EEE, MMM d, yyyy').format(dateObj);
+
+      items.add(_ListItem(dateString: dateHeaderText));
+
+      for (final meeting in groupedByDate[dateKey]!) {
+        items.add(_ListItem(meeting: meeting));
+      }
+    }
+
     return ListView.builder(
       padding: const EdgeInsets.all(8),
-      itemCount: meetings.length,
+      itemCount: items.length,
       itemBuilder: (context, index) {
-        final meeting = meetings[index];
-        final student = studentProvider.getStudent(meeting.studentId);
+        final item = items[index];
 
-        return CupertinoListTile(
-          leading: Container(
-            width: 100,
-            height: 40,
-            decoration: BoxDecoration(
-              color: CupertinoColors.activeBlue.withOpacity(0.2),
-              shape: BoxShape.circle,
+        if (item.isDateHeader) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: Text(
+              item.dateString!,
+              style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
-            child: Center(
-              child: Text(
-                DateFormat('HH:mm').format(meeting.startTime.toLocal()),
-                style: CupertinoTheme.of(context)
-                    .textTheme
-                    .textStyle
-                    .copyWith(fontWeight: FontWeight.bold, fontSize: 16),
-              ),
-            ),
-          ),
-          title: Text(
-            student?.name ?? 'Unknown student',
-            style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
-          ),
-          subtitle: Text(
-            '${meeting.duration} min • ${DateFormat('EEE, MMM d').format(meeting.startTime)}',
-            style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
-                  color: CupertinoColors.systemGrey,
-                ),
-          ),
-          trailing: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                '${meeting.price.toStringAsFixed(2)} PLN',
-                style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
-                      color: meeting.isPayed
-                          ? CupertinoColors.systemGreen
-                          : CupertinoColors.systemRed,
-                    ),
-              ),
-              const SizedBox(width: 8),
-              if (meeting.isPayed)
-                const Icon(CupertinoIcons.checkmark_alt_circle_fill,
-                    color: CupertinoColors.systemGreen, size: 20),
-            ],
-          ),
-          onTap: () {
-            Navigator.of(context).push(CupertinoPageRoute(
+          );
+        } else {
+          // This is a regular meeting row
+          final meeting = item.meeting!;
+          final student = studentProvider.getStudent(meeting.studentId);
+
+          return GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () {
+              Navigator.of(context).push(CupertinoPageRoute(
                 fullscreenDialog: true,
-                builder: (context) => AddMeetingScreen(
-                      meeting: meeting,
-                    )));
-          },
-        );
+                builder: (context) => AddMeetingScreen(meeting: meeting),
+              ));
+            },
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              child: Row(
+                children: [
+                  SizedBox(
+                    width: 60, // Fixed width for time
+                    child: Text(
+                      DateFormat('HH:mm').format(meeting.startTime.toLocal()),
+                      style: CupertinoTheme.of(context)
+                          .textTheme
+                          .textStyle
+                          .copyWith(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          student?.name ?? 'Unknown student',
+                          style: CupertinoTheme.of(context)
+                              .textTheme
+                              .textStyle
+                              .copyWith(
+                                fontWeight: FontWeight.w600,
+                              ),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          '${meeting.duration} min • '
+                          '${DateFormat('EEE, MMM d').format(meeting.startTime)}',
+                          style: CupertinoTheme.of(context)
+                              .textTheme
+                              .textStyle
+                              .copyWith(
+                                color: CupertinoColors.systemGrey,
+                              ),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                        ),
+                      ],
+                    ),
+                  ),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        '${meeting.price.toStringAsFixed(2)} PLN',
+                        style: CupertinoTheme.of(context)
+                            .textTheme
+                            .textStyle
+                            .copyWith(
+                              color: meeting.isPayed
+                                  ? CupertinoColors.systemGreen
+                                  : CupertinoColors.systemRed,
+                            ),
+                      ),
+                      if (meeting.isPayed) ...[
+                        const SizedBox(width: 4),
+                        const Icon(
+                          CupertinoIcons.checkmark_alt_circle_fill,
+                          color: CupertinoColors.systemGreen,
+                          size: 20,
+                        ),
+                      ],
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
       },
     );
   }
@@ -127,4 +201,14 @@ class MeetingsScreen extends StatelessWidget {
       ),
     );
   }
+}
+
+class _ListItem {
+  final String? dateString;
+  final Meeting? meeting;
+
+  _ListItem({this.dateString, this.meeting})
+      : assert(dateString != null || meeting != null);
+
+  bool get isDateHeader => dateString != null;
 }
