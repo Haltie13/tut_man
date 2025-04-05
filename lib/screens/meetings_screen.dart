@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tutoring_management/model/meeting_provider.dart';
 import 'package:tutoring_management/model/student_provider.dart';
 import 'package:tutoring_management/screens/add_meeting_screen.dart';
@@ -37,11 +38,12 @@ class MeetingsScreen extends StatelessWidget {
         })));
   }
 
-// A helper class to represent either a date header or a meeting
 
-  Widget _meetingsList(BuildContext context, List<Meeting> meetings,
-      StudentProvider studentProvider) {
+  Future<Widget> _meetingsList(BuildContext context, List<Meeting> meetings,
+      StudentProvider studentProvider) async {
     meetings.sort((a, b) => a.startTime.compareTo(b.startTime));
+    final prefs = await SharedPreferences.getInstance();
+    final currency = prefs.getString('currency') ?? 'PLN';
 
     final Map<String, List<Meeting>> groupedByDate = {};
     for (final meeting in meetings) {
@@ -132,8 +134,7 @@ class MeetingsScreen extends StatelessWidget {
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          '${meeting.duration} min • '
-                          '${DateFormat('EEE, MMM d').format(meeting.startTime)}',
+                          '${meeting.duration} min • ',
                           style: CupertinoTheme.of(context)
                               .textTheme
                               .textStyle
@@ -150,7 +151,7 @@ class MeetingsScreen extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        '${meeting.price.toStringAsFixed(2)} PLN',
+                        '$currency ${meeting.price.toStringAsFixed(2)}',
                         style: CupertinoTheme.of(context)
                             .textTheme
                             .textStyle

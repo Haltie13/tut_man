@@ -45,6 +45,7 @@ dependencies:
   provider: ^6.1.2
   syncfusion_flutter_datepicker: ^28.2.11+1
   flutter_timezone: ^4.1.0
+  shared_preferences: ^2.5.3
 
 
 

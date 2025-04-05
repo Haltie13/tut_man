@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:tutoring_management/add_event_example.dart';
 import 'package:tutoring_management/screens/add_meeting_screen.dart';
+import 'package:tutoring_management/screens/settings_screen.dart';
 import 'package:tutoring_management/screens/test_button.dart';
 import '/model/meeting.dart';
 import 'meetings_screen.dart';
@@ -32,7 +33,7 @@ class HomeScreen extends StatelessWidget {
           case 1:
             return AddMeetingScreen();
           default:
-            return TestButtonScreen();
+            return SettingsScreen();
         }
       },
     );
