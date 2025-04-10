@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tutoring_management/model/meeting_provider.dart';
 import 'package:tutoring_management/model/student_provider.dart';
 import 'package:tutoring_management/screens/add_meeting_screen.dart';
+import 'package:tutoring_management/utils/settings_provider.dart';
 import '../model/student.dart';
 import '/model/meeting.dart';
 
@@ -14,41 +15,50 @@ class MeetingsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
-        navigationBar: CupertinoNavigationBar(
-          middle: const Text('Meetings'),
-          trailing: CupertinoButton(
-              onPressed: () {
-                Navigator.of(context).push(CupertinoPageRoute(
-                    fullscreenDialog: true,
-                    builder: (context) => AddMeetingScreen()));
-              },
-              padding: EdgeInsets.zero,
-              child: Icon(
-                CupertinoIcons.plus,
-                size: 30,
-              )),
+      navigationBar: CupertinoNavigationBar(
+        middle: const Text('Meetings'),
+        trailing: CupertinoButton(
+          onPressed: () {
+            Navigator.of(context).push(CupertinoPageRoute(
+              fullscreenDialog: true,
+              builder: (context) => AddMeetingScreen(),
+            ));
+          },
+          padding: EdgeInsets.zero,
+          child: const Icon(CupertinoIcons.plus, size: 30),
         ),
-        child: SafeArea(child: Consumer2<MeetingProvider, StudentProvider>(
-            builder: (context, meetingProvider, studentProvider, child) {
-          if (meetingProvider.meetings.isEmpty) {
-            return _noMeetings();
-          }
-          return _meetingsList(
-              context, meetingProvider.meetings, studentProvider);
-        })));
+      ),
+      child: SafeArea(
+        child: Consumer<MeetingProvider>(
+          builder: (context, meetingProvider, child) {
+            if (meetingProvider.meetings.isEmpty) {
+              return _noMeetings();
+            }
+
+            return Consumer2<StudentProvider, SettingsProvider>(
+              builder: (context, studentProvider, settingsProvider, child) {
+                return _meetingsList(
+                  context,
+                  meetingProvider.meetings,
+                  studentProvider,
+                  settingsProvider.currency,
+                );
+              },
+            );
+          },
+        ),
+      ),
+    );
   }
 
-
-  Future<Widget> _meetingsList(BuildContext context, List<Meeting> meetings,
-      StudentProvider studentProvider) async {
+  Widget _meetingsList(BuildContext context, List<Meeting> meetings,
+      StudentProvider studentProvider, String currency) {
     meetings.sort((a, b) => a.startTime.compareTo(b.startTime));
-    final prefs = await SharedPreferences.getInstance();
-    final currency = prefs.getString('currency') ?? 'PLN';
 
     final Map<String, List<Meeting>> groupedByDate = {};
     for (final meeting in meetings) {
-      final dateKey = DateFormat('yyyy-MM-dd')
-          .format(meeting.startTime.toLocal());
+      final dateKey =
+          DateFormat('yyyy-MM-dd').format(meeting.startTime.toLocal());
       groupedByDate.putIfAbsent(dateKey, () => []).add(meeting);
     }
 
@@ -134,7 +144,7 @@ class MeetingsScreen extends StatelessWidget {
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          '${meeting.duration} min • ',
+                          '${meeting.duration} min',
                           style: CupertinoTheme.of(context)
                               .textTheme
                               .textStyle
@@ -156,12 +166,12 @@ class MeetingsScreen extends StatelessWidget {
                             .textTheme
                             .textStyle
                             .copyWith(
-                              color: meeting.isPayed
+                              color: meeting.isPaid
                                   ? CupertinoColors.systemGreen
                                   : CupertinoColors.systemRed,
                             ),
                       ),
-                      if (meeting.isPayed) ...[
+                      if (meeting.isPaid) ...[
                         const SizedBox(width: 4),
                         const Icon(
                           CupertinoIcons.checkmark_alt_circle_fill,

@@ -1,7 +1,9 @@
+import 'package:decimal/decimal.dart';
+
 class Student {
   final int? id;
   final String name;
-  final double pricePerHour;
+  final Decimal pricePerHour;
 
   Student({
     this.id,
@@ -13,7 +15,7 @@ class Student {
     return {
       'id': id,
       'name': name,
-      'pricePerHour': pricePerHour,
+      'pricePerHour': pricePerHour.toString(),
     };
   }
 
@@ -21,7 +23,7 @@ class Student {
     return Student(
       id: map['id'] as int?,
       name: map['name'] as String,
-      pricePerHour: map['pricePerHour'] as double,
+      pricePerHour: Decimal.parse(map['pricePerHour'] as String),
     );
   }
 }

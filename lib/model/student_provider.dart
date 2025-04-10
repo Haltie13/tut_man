@@ -1,4 +1,5 @@
-import 'package:flutter/foundation.dart';
+import 'package:decimal/decimal.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:sqflite/sqflite.dart';
 import 'database_helper.dart';
 import 'student.dart';
@@ -19,23 +20,18 @@ class StudentProvider extends ChangeNotifier {
 
   Future<void> loadStudents() async {
     final db = await _dbHelper.database;
-    final List<Map<String, dynamic>> maps = await db.query('Student');
-    // print("Loaded students: $maps");
-    _students = List.generate(maps.length, (i) => Student.fromMap(maps[i]));
+    final data = await db.query('Student');
+    _students = data.map((m) => Student.fromMap(m)).toList();
     notifyListeners();
   }
 
-  Future<void> insertStudent(Student student) async {
-    final db = await _dbHelper.database;
-    int id = await db.insert('Student', student.toMap());
-    // print("Inserted student with id: $id");
-    await loadStudents();
-  }
-
-  Future<void> updateStudent(Student student) async {
-    final db = await _dbHelper.database;
-    await db.update('Student', student.toMap(),
-        where: 'id = ?', whereArgs: [student.id]);
+  Future<void> addOrUpdate(Student student) async {
+    final db = await DatabaseHelper().database;
+    db.insert(
+      'Student',
+      student.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
     await loadStudents();
   }
 
@@ -45,23 +41,18 @@ class StudentProvider extends ChangeNotifier {
     await loadStudents();
   }
 
-  Student? getStudent(int id){
+  Student? getStudent(int id) {
     try {
       return _students.firstWhere((s) => s.id == id);
-    }catch (e) {
+    } catch (e) {
       return null;
     }
   }
-}
-
-
-
-Future<void> addExampleStudents() async {
-  StudentProvider sp = StudentProvider();
-
-  await sp.insertStudent(Student(name: 'Alice', pricePerHour: 25.0));
-  await sp.insertStudent(Student(name: 'Bob', pricePerHour: 30.0));
-  await sp.insertStudent(Student(name: 'Charlie', pricePerHour: 18.75));
-
-  print('Example students added');
+  Future<void> addExampleStudents() async {
+    await addOrUpdate(Student(name: 'Alice', pricePerHour: Decimal.parse('25.0')));
+    await addOrUpdate(Student(name: 'Bob', pricePerHour: Decimal.parse('70.0')));
+    await addOrUpdate(Student(name: 'Charlie', pricePerHour: Decimal.parse('90.0')));
+    await loadStudents();
+    print('Example students added');
+  }
 }

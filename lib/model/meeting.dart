@@ -9,7 +9,7 @@ class Meeting {
   String? eventId;
   final int studentId;
   final Decimal price;
-  final bool isPayed;
+  final bool isPaid;
   final String description;
 
   Meeting({
@@ -19,19 +19,19 @@ class Meeting {
     required this.studentId,
     required this.eventId,
     required this.price,
-    required this.isPayed,
+    required this.isPaid,
     required this.description
   });
 
   Map<String, Object?> toMap() {
     return {
       'id': id,
-      'startTime': startTime.toIso8601String(), // converting TZDateTime to string
+      'startTime': startTime.toIso8601String(),
       'duration': duration,
       'eventId': eventId,
       'studentId': studentId,
-      'price': price.toString(), // converting Decimal to string
-      'payed': isPayed ? 1 : 0, // storing boolean as integer
+      'price': price.toString(),
+      'paid': isPaid ? 1 : 0,
       'description': description,
     };
   }
@@ -44,7 +44,7 @@ class Meeting {
       eventId: map['eventId'] as String?,
       studentId: map['studentId'] as int,
       price: Decimal.parse(map['price'] as String),
-      isPayed: (map['payed'] as int) == 1,
+      isPaid: (map['paid'] as int) == 1,
       description: map['description'] as String,
     );
   }
@@ -58,7 +58,7 @@ final List<Meeting> sampleMeetings = [
     eventId: null,
     studentId: 101,
     price: Decimal.parse("50.00"),
-    isPayed: false,
+    isPaid: false,
     description: "Math tutoring session",
   ),
   Meeting(
@@ -68,7 +68,7 @@ final List<Meeting> sampleMeetings = [
     eventId: null,
     studentId: 102,
     price: Decimal.parse("40.00"),
-    isPayed: true,
+    isPaid: true,
     description: "Physics tutoring session",
   ),
 ];

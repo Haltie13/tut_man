@@ -1,6 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tutoring_management/utils/settings_provider.dart';
 import '../custom_widgets/custom_text_button.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -11,36 +13,6 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenPage extends State<SettingsScreen> {
-  int durationInterval = 15;
-  String currency = 'PLN';
-
-  final int defaultDurationInterval = 15;
-  final String defaultCurrency = 'PLN';
-
-  @override
-  void initState() {
-    super.initState();
-    _loadSettings();
-  }
-
-  Future<void> _loadSettings() async {
-    final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      durationInterval = prefs.getInt('durationInterval') ?? defaultDurationInterval;
-      currency = prefs.getString('currency') ?? defaultCurrency;
-    });
-  }
-
-  Future<void> _updateSettings(String name, Object value) async {
-    final prefs = await SharedPreferences.getInstance();
-    if (name == 'durationInterval' && value is int) {
-      await prefs.setInt('durationInterval', value);
-      setState(() => durationInterval = value);
-    } else if (name == 'currency' && value is String) {
-      await prefs.setString('currency', value);
-      setState(() => currency = value);
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,43 +20,50 @@ class _SettingsScreenPage extends State<SettingsScreen> {
       navigationBar: const CupertinoNavigationBar(
         middle: Text('Settings'),
       ),
-      child: SafeArea(
-        child: ListView(
-          children: [
-            CupertinoFormSection.insetGrouped(
-              header: const Text('MEETING'),
+      child: Consumer<SettingsProvider>(
+        builder: (context, settingsProvider, child) {
+          return SafeArea(
+            child: ListView(
               children: [
-                CupertinoFormRow(
-                  prefix: Text(
-                    'Duration interval',
-                    style: CupertinoTheme.of(context).textTheme.textStyle,
-                  ),
-                  child: CustomTextButton(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    onPressed: () => _showDurationDialog(context),
-                    text: '$durationInterval min',
-                  ),
-                ),
-                CupertinoFormRow(
-                  prefix: Text(
-                    'Currency',
-                    style: CupertinoTheme.of(context).textTheme.textStyle,
-                  ),
-                  child: CustomTextButton(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    onPressed: () => _showCurrencyDialog(context),
-                    text: currency,
-                  ),
+                CupertinoFormSection.insetGrouped(
+                  header: const Text('MEETING'),
+                  children: [
+                    CupertinoFormRow(
+                      prefix: Text(
+                        'Duration interval',
+                        style: CupertinoTheme.of(context).textTheme.textStyle,
+                      ),
+                      child: CustomTextButton(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 6),
+                        onPressed: () => _showDurationDialog(context, settingsProvider),
+                        text: '${settingsProvider.durationInterval} min',
+                      ),
+                    ),
+                    CupertinoFormRow(
+                      prefix: Text(
+                        'Currency',
+                        style: CupertinoTheme.of(context).textTheme.textStyle,
+                      ),
+                      child: CustomTextButton(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 6),
+                        onPressed: () => _showCurrencyDialog(context, settingsProvider),
+                        text: settingsProvider.currency,
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
 
-  Future<void> _showDurationDialog(BuildContext context) async {
+  Future<void> _showDurationDialog(BuildContext context, SettingsProvider settingsProvider) async {
+    int durationInterval = settingsProvider.durationInterval;
     final controller = TextEditingController(text: durationInterval.toString());
     final newDuration = await showCupertinoDialog<int>(
       context: context,
@@ -97,6 +76,7 @@ class _SettingsScreenPage extends State<SettingsScreen> {
             keyboardType: TextInputType.number,
             autofocus: true,
             placeholder: 'Minutes',
+            maxLength: 4,
           ),
         ),
         actions: [
@@ -118,10 +98,11 @@ class _SettingsScreenPage extends State<SettingsScreen> {
         ],
       ),
     );
-    if (newDuration != null) _updateSettings('durationInterval', newDuration);
+    if (newDuration != null) settingsProvider.setDurationInterval(newDuration);
   }
 
-  Future<void> _showCurrencyDialog(BuildContext context) async {
+  Future<void> _showCurrencyDialog(BuildContext context, SettingsProvider settingsProvider) async {
+    String currency = settingsProvider.currency;
     final controller = TextEditingController(text: currency);
     final newCurrency = await showCupertinoDialog<String>(
       context: context,
@@ -157,6 +138,6 @@ class _SettingsScreenPage extends State<SettingsScreen> {
         ],
       ),
     );
-    if (newCurrency != null) _updateSettings('currency', newCurrency);
+    if (newCurrency != null) settingsProvider.setCurrency(newCurrency);
   }
 }

@@ -33,7 +33,7 @@ class _AddMeetingScreenState extends State<AddMeetingScreen> {
   int duration = 60;
   String? eventId;
   Decimal price = Decimal.zero;
-  bool iSPayed = false;
+  bool iSPaid = false;
   String description = '';
 
   final DateFormat timeFormat = DateFormat.Hm();
@@ -42,6 +42,7 @@ class _AddMeetingScreenState extends State<AddMeetingScreen> {
   int durationInterval = 15;
 
   final TextEditingController _descriptionController = TextEditingController();
+
   late StudentProvider studentProvider;
   final CalendarManager calendarManager = CalendarManager();
 
@@ -61,10 +62,16 @@ class _AddMeetingScreenState extends State<AddMeetingScreen> {
       duration = widget.meeting!.duration;
       eventId = widget.meeting!.eventId;
       price = widget.meeting!.price;
-      iSPayed = widget.meeting!.isPayed;
+      iSPaid = widget.meeting!.isPaid;
       description = widget.meeting!.description;
       _descriptionController.text = description;
     }
+  }
+
+  @override
+  void dispose() {
+    _descriptionController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadSettings() async {
@@ -119,11 +126,11 @@ class _AddMeetingScreenState extends State<AddMeetingScreen> {
         studentId: studentId,
         eventId: eventId,
         price: price,
-        isPayed: iSPayed,
+        isPaid: iSPaid,
         description: description);
 
     meetingProvider.addOrUpdate(meeting);
-    Navigator.pop(context);
+    Navigator.of(context).pop();
   }
 
   @override
@@ -142,12 +149,12 @@ class _AddMeetingScreenState extends State<AddMeetingScreen> {
         child: Column(
           children: [
             Expanded(
-              child: SingleChildScrollView(
+              child:
+              SingleChildScrollView(
                 child: Column(
                   children: [
                     CupertinoFormSection.insetGrouped(
                       header: const Text('Meeting'),
-                      // margin: EdgeInsets.zero,
                       children: [
                         _buildStudentSelector(),
                         _buildDateRow(),
@@ -207,39 +214,6 @@ class _AddMeetingScreenState extends State<AddMeetingScreen> {
     );
   }
 
-  Widget _buildDateRow_() {
-    return CupertinoTextFormFieldRow(
-      prefix: const Text('Date'),
-      controller: TextEditingController(text: dateFormat.format(startDateTime)),
-      onTap: () async {
-        final pickedDate = await showDatePicker(
-          context: context,
-          firstDate: DateTime(2000),
-          lastDate: DateTime(2100),
-          initialDate: startDateTime,
-        );
-
-        if (pickedDate != null) {
-          final isSameDate = pickedDate.year == startDateTime.year &&
-              pickedDate.month == startDateTime.month &&
-              pickedDate.day == startDateTime.day;
-
-          if (!isSameDate) {
-            setState(() {
-              startDateTime = TZDateTime.local(
-                pickedDate.year,
-                pickedDate.month,
-                pickedDate.day,
-                startDateTime.hour,
-                startDateTime.minute,
-              );
-            });
-          }
-        }
-      },
-      readOnly: true,
-    );
-  }
 
   Widget _buildDateRow() {
     return CupertinoFormRow(
@@ -397,13 +371,13 @@ class _AddMeetingScreenState extends State<AddMeetingScreen> {
             onPressed: () {
               final student = studentProvider.getStudent(studentId);
               final pricePerHour = student?.pricePerHour ?? 0;
-              final calculatedPrice = pricePerHour * duration.toDouble() / 60.0;
+              final calculatedPrice = (pricePerHour as Decimal).toDouble() * duration / 60.0;
               setState(() {
-                price = Decimal.parse(calculatedPrice.toStringAsFixed(2));
+                price = Decimal.parse(calculatedPrice.toString());
               });
             },
             child: Text(
-                '$currency ${((studentProvider.getStudent(studentId)?.pricePerHour ?? 0) * duration.toDouble() / 60.0).toStringAsFixed(2)}'),
+                '$currency ${((studentProvider.getStudent(studentId)?.pricePerHour.toDouble() ?? 0) * duration.toDouble() / 60.0).toStringAsFixed(2)}'),
           ),
         ],
       ),
@@ -414,8 +388,8 @@ class _AddMeetingScreenState extends State<AddMeetingScreen> {
     return CupertinoFormRow(
       prefix: const Text('Payed'),
       child: CupertinoCheckbox(
-        value: iSPayed,
-        onChanged: (bool? value) => setState(() => iSPayed = value ?? false),
+        value: iSPaid,
+        onChanged: (bool? value) => setState(() => iSPaid = value ?? false),
       ),
     );
   }
