@@ -29,21 +29,17 @@ class MeetingsScreen extends StatelessWidget {
         ),
       ),
       child: SafeArea(
-        child: Consumer<MeetingProvider>(
-          builder: (context, meetingProvider, child) {
+        child: Consumer3<MeetingProvider, StudentProvider, SettingsProvider>(
+          builder: (context, meetingProvider, studentProvider, settingsProvider,
+              child) {
             if (meetingProvider.meetings.isEmpty) {
               return _noMeetings();
             }
-
-            return Consumer2<StudentProvider, SettingsProvider>(
-              builder: (context, studentProvider, settingsProvider, child) {
-                return _meetingsList(
-                  context,
-                  meetingProvider.meetings,
-                  studentProvider,
-                  settingsProvider.currency,
-                );
-              },
+            return _meetingsList(
+              context,
+              meetingProvider.meetings,
+              studentProvider,
+              settingsProvider.currency,
             );
           },
         ),
