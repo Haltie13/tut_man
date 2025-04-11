@@ -52,7 +52,7 @@ To run app on iOS/Android simulator.
 
 To open app on simulator run:
 ```bash
-git clone https://github.com/Haltie13/tut_man
+git clone https://github.com/Haltie13/tut_man.git
 cd tutman
 flutter pub get
 flutter run
