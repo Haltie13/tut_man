@@ -41,6 +41,7 @@
 - Cupertino Widgets for iOS-native UI
 
 # Running TutMan
+It is higly recommended to use MacOS to run the app on a Simulator.
 ## Prerequisites
 To run app on iOS/Android simulator.
 - Flutter SDK installed (latest stable version) - to install Flutter follow the instructions: [Flutter Installation](https://docs.flutter.dev/get-started/install)
@@ -60,6 +61,19 @@ Follow Flutter instructions.
 
 Example meetings will appear after adding one custom one.
 
+## Example screenshots
+
+<p align="center">
+  <img src="Assets/Screenshot1.png" width="30%" />
+  <img src="Assets/Screenshot2.png" width="30%" />
+  <img src="Assets/Screenshot3.png" width="30%" />
+</p>
+
+<p align="center">
+  <img src="Assets/Screenshot4.png" width="30%" />
+  <img src="Assets/Screenshot5.png" width="30%" />
+  <img src="Assets/Screenshot6.png" width="30%" />
+</p>
 
 
 
