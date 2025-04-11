@@ -1,12 +1,14 @@
+import 'dart:convert';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:device_calendar/device_calendar.dart';
 import 'package:flutter/foundation.dart';
 import 'package:tutoring_management/custom_widgets/custom_text_button.dart';
 import 'package:tutoring_management/model/meeting_provider.dart';
-import 'package:tutoring_management/model/student.dart';
 import 'package:tutoring_management/utils/calendar_manager.dart';
 import '../model/meeting.dart';
 import '../model/student_provider.dart';
@@ -26,12 +28,12 @@ class AddMeetingScreen extends StatefulWidget {
 }
 
 class _AddMeetingScreenState extends State<AddMeetingScreen> {
-  final _formKey = GlobalKey<FormState>();
   int? meetingId;
-  int studentId = -1;
+  int? studentId = -1;
   TZDateTime startDateTime = getCurrentRoundDateTime();
   int duration = 60;
   String? eventId;
+  String? calendarId;
   Decimal price = Decimal.zero;
   bool iSPaid = false;
   String description = '';
@@ -40,6 +42,9 @@ class _AddMeetingScreenState extends State<AddMeetingScreen> {
   final DateFormat dateFormat = DateFormat('dd/MM/yyyy');
   String currency = 'PLN';
   int durationInterval = 15;
+  List<Map<String, dynamic>> _holidays = [];
+  String? _holidayName;
+  bool _isHolidayLoading = false;
 
   final TextEditingController _descriptionController = TextEditingController();
 
@@ -47,6 +52,7 @@ class _AddMeetingScreenState extends State<AddMeetingScreen> {
   final CalendarManager calendarManager = CalendarManager();
 
   bool _showTimePicker = false;
+  bool _showDatePicker = false;
 
   @override
   void initState() {
@@ -54,6 +60,7 @@ class _AddMeetingScreenState extends State<AddMeetingScreen> {
     _loadSettings();
     studentProvider = Provider.of<StudentProvider>(context, listen: false);
     startDateTime = widget.meeting?.startTime ?? getCurrentRoundDateTime();
+    _fetchHolidays();
 
     if (widget.meeting != null) {
       meetingId = widget.meeting!.id;
@@ -85,6 +92,47 @@ class _AddMeetingScreenState extends State<AddMeetingScreen> {
     });
   }
 
+  Future<void> _fetchHolidays() async {
+    setState(() => _isHolidayLoading = true);
+    try {
+      final year = DateTime.now().year;
+      final response = await http.get(
+        Uri.parse('https://date.nager.at/api/v3/PublicHolidays/$year/PL'),
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = jsonDecode(response.body);
+        setState(() {
+          _holidays = data.map((holiday) => {
+            'date': DateTime.parse(holiday['date']),
+            'name': holiday['localName'] ?? holiday['name'] ?? 'Holiday'
+          }).toList();
+        });
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Failed to fetch holidays: $e');
+      }
+    } finally {
+      setState(() => _isHolidayLoading = false);
+    }
+  }
+
+
+  void _checkHoliday(DateTime date) {
+    final holiday = _holidays.firstWhere(
+          (h) =>
+      h['date'].year == date.year &&
+          h['date'].month == date.month &&
+          h['date'].day == date.day,
+      orElse: () => {'name': null},
+    );
+
+    setState(() {
+      _holidayName = holiday['name'];
+    });
+  }
+
   void _saveMeeting() async {
     if (studentId == -1) {
       showCupertinoDialog(
@@ -104,20 +152,25 @@ class _AddMeetingScreenState extends State<AddMeetingScreen> {
     final meetingProvider =
         Provider.of<MeetingProvider>(context, listen: false);
     final student = studentProvider.getStudent(studentId);
-    final studentName = student?.name ?? 'Tutoring';
+    final studentName = student?.name ?? 'Deleted student';
 
     if (eventId != null) {
-      calendarManager.removeEventFromCalendar(eventId!, defaultCalendar: true);
+      calendarManager.removeEventFromCalendar(eventId!, calendarId: calendarId);
       if (kDebugMode) {
         print('Deleted event with id $eventId');
       }
     }
 
-    eventId = await calendarManager.addEventToCalendar(
+    final result = await calendarManager.addEventToCalendar(
         title: studentName,
         startTime: startDateTime,
         duration: duration,
-        description: description);
+        description: '$currency $price\n$description');
+
+    if (result != null) {
+      calendarId = result[0];
+      eventId = result[1];
+    }
 
     final meeting = Meeting(
         id: meetingId,
@@ -125,12 +178,28 @@ class _AddMeetingScreenState extends State<AddMeetingScreen> {
         duration: duration,
         studentId: studentId,
         eventId: eventId,
+        calendarId: calendarId,
         price: price,
         isPaid: iSPaid,
         description: description);
 
     meetingProvider.addOrUpdate(meeting);
     Navigator.of(context).pop();
+  }
+
+  Future<void> _deleteMeeting() async {
+    if (meetingId == null) return;
+
+    if (eventId != null) {
+      calendarManager.removeEventFromCalendar(eventId!, calendarId: calendarId);
+      if (kDebugMode) {
+        print('Deleted event with id $eventId');
+      }
+    }
+
+    final meetingProvider =
+        Provider.of<MeetingProvider>(context, listen: false);
+    await meetingProvider.delete(meetingId!);
   }
 
   @override
@@ -149,8 +218,7 @@ class _AddMeetingScreenState extends State<AddMeetingScreen> {
         child: Column(
           children: [
             Expanded(
-              child:
-              SingleChildScrollView(
+              child: SingleChildScrollView(
                 child: Column(
                   children: [
                     CupertinoFormSection.insetGrouped(
@@ -169,6 +237,10 @@ class _AddMeetingScreenState extends State<AddMeetingScreen> {
                   ],
                 ),
               ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: _buildDeleteButton(),
             ),
           ],
         ),
@@ -192,9 +264,9 @@ class _AddMeetingScreenState extends State<AddMeetingScreen> {
               color: isSelected
                   ? CupertinoColors.activeBlue
                   : CupertinoDynamicColor.resolve(
-                CupertinoColors.secondarySystemFill,
-                context,
-              ),
+                      CupertinoColors.secondarySystemFill,
+                      context,
+                    ),
               onPressed: () => setState(() => studentId = student.id!),
               child: Text(
                 student.name,
@@ -214,38 +286,58 @@ class _AddMeetingScreenState extends State<AddMeetingScreen> {
     );
   }
 
-
   Widget _buildDateRow() {
-    return CupertinoFormRow(
-      prefix: Text('Date'),
-      child: CustomTextButton(
-          onPressed: () async {
-            final pickedDate = await showDatePicker(
-              context: context,
-              firstDate: DateTime(2000),
-              lastDate: DateTime(2100),
-              initialDate: startDateTime,
-            );
-
-            if (pickedDate != null) {
-              final isSameDate = pickedDate.year == startDateTime.year &&
-                  pickedDate.month == startDateTime.month &&
-                  pickedDate.day == startDateTime.day;
-
-              if (!isSameDate) {
+    return Column(
+      children: [
+        CupertinoFormRow(
+          prefix: const Text('Date'),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              CustomTextButton(
+                onPressed: () => setState(() => _showDatePicker = !_showDatePicker),
+                text: dateFormat.format(startDateTime),
+              ),
+              if (_holidayName != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 4),
+                  child: Text(
+                    _holidayName!,
+                    style: TextStyle(
+                      color: CupertinoColors.systemRed,
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
+        if (_showDatePicker)
+          Container(
+            height: 200,
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: CupertinoDatePicker(
+              mode: CupertinoDatePickerMode.date,
+              initialDateTime: startDateTime.toLocal(),
+              minimumDate: DateTime(2000),
+              maximumDate: DateTime(2100),
+              showDayOfWeek: true,
+              dateOrder: DatePickerDateOrder.dmy,
+              onDateTimeChanged: (DateTime newDate) {
                 setState(() {
                   startDateTime = TZDateTime.local(
-                    pickedDate.year,
-                    pickedDate.month,
-                    pickedDate.day,
+                    newDate.year,
+                    newDate.month,
+                    newDate.day,
                     startDateTime.hour,
                     startDateTime.minute,
                   );
+                  _checkHoliday(newDate);
                 });
-              }
-            }
-          },
-          text: dateFormat.format(startDateTime)),
+              },
+            ),
+          ),
+      ],
     );
   }
 
@@ -256,10 +348,8 @@ class _AddMeetingScreenState extends State<AddMeetingScreen> {
           prefix: const Text('Time'),
           child: CustomTextButton(
             onPressed: () => setState(() => _showTimePicker = !_showTimePicker),
-            text:
-                '${timeFormat.format(startDateTime.toLocal())} - '
+            text: '${timeFormat.format(startDateTime.toLocal())} - '
                 '${timeFormat.format(startDateTime.add(Duration(minutes: duration)).toLocal())}',
-
           ),
         ),
         if (_showTimePicker)
@@ -371,7 +461,8 @@ class _AddMeetingScreenState extends State<AddMeetingScreen> {
             onPressed: () {
               final student = studentProvider.getStudent(studentId);
               final pricePerHour = student?.pricePerHour ?? 0;
-              final calculatedPrice = (pricePerHour as Decimal).toDouble() * duration / 60.0;
+              final calculatedPrice =
+                  (pricePerHour as Decimal).toDouble() * duration / 60.0;
               setState(() {
                 price = Decimal.parse(calculatedPrice.toString());
               });
@@ -404,6 +495,46 @@ class _AddMeetingScreenState extends State<AddMeetingScreen> {
       minLines: 1,
       maxLines: 3,
       keyboardType: TextInputType.multiline,
+    );
+  }
+
+  Widget _buildDeleteButton() {
+    return CupertinoButton(
+      onPressed: () async {
+        final bool? confirmed = await showCupertinoDialog<bool>(
+          context: context,
+          builder: (BuildContext context) {
+            return CupertinoAlertDialog(
+              title: const Text('Delete meeting'),
+              content: const Text('Are you sure you want to delete this meeting? This action cannot be undone.'),
+              actions: [
+                CupertinoDialogAction(
+                  isDefaultAction: true,
+                  onPressed: () {
+                    Navigator.pop(context, false);
+                  },
+                  child: const Text('No'),
+                ),
+                CupertinoDialogAction(
+                  isDestructiveAction: true,
+                  onPressed: () {
+                    Navigator.pop(context, true);
+                  },
+                  child: const Text('Yes'),
+                ),
+              ],
+            );
+          },
+        );
+        if (confirmed == true) {
+          _deleteMeeting();
+          Navigator.of(context).pop();
+        }
+      },
+      child: const Text(
+        'Delete',
+        style: TextStyle(color: CupertinoColors.destructiveRed),
+      ),
     );
   }
 

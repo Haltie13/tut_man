@@ -41,6 +41,7 @@ class DatabaseHelper {
         startTime TEXT NOT NULL,
         duration INTEGER NOT NULL,
         eventId TEXT,
+        calendarId TEXT,
         studentId INTEGER NOT NULL,
         price TEXT NOT NULL,
         paid INTEGER NOT NULL,

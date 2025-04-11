@@ -35,14 +35,69 @@ class MeetingsScreen extends StatelessWidget {
             if (meetingProvider.meetings.isEmpty) {
               return _noMeetings();
             }
-            return _meetingsList(
-              context,
-              meetingProvider.meetings,
-              studentProvider,
-              settingsProvider.currency,
-            );
+            return Column(children: [
+              _searchBarRow(context, meetingProvider),
+              _filtersRow(context, meetingProvider),
+              Expanded(
+                child: meetingProvider.filteredMeetings.isEmpty
+                    ? _noMeetingsFound()
+                    : _meetingsList(
+                  context,
+                  meetingProvider.filteredMeetings,
+                  studentProvider,
+                  settingsProvider.currency,
+                ),
+              )
+
+            ]);
           },
         ),
+      ),
+    );
+  }
+
+  Widget _searchBarRow(BuildContext context, MeetingProvider meetingProvider) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: CupertinoSearchTextField(
+        placeholder: 'Search by student or notes...',
+        onChanged: (value) => meetingProvider.setSearch(value),
+        onSubmitted: (value) => meetingProvider.setSearch(value),
+      ),
+    );
+  }
+
+  Widget _filtersRow(BuildContext context, MeetingProvider meetingProvider) {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      child: Row(
+        children: MeetingFilter.values.map((filter) {
+          final isSelected = meetingProvider.activeFilters.contains(filter);
+          return Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: CupertinoButton(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
+              minSize: 28,
+              borderRadius: BorderRadius.circular(16),
+              pressedOpacity: 0.6,
+              onPressed: () => meetingProvider.toggleFilter(filter),
+              color: isSelected
+                  ? CupertinoColors.activeBlue
+                  : CupertinoColors.tertiarySystemFill,
+              child: Text(
+                filter.displayName,
+                style: TextStyle(
+                  fontSize: 15,
+                  color: CupertinoDynamicColor.resolve(
+                    CupertinoColors.label,
+                    context,
+                  ),
+                ),
+              ),
+            ),
+          );
+        }).toList(),
       ),
     );
   }
@@ -65,8 +120,7 @@ class MeetingsScreen extends StatelessWidget {
 
     for (final dateKey in sortedDateKeys) {
       final dateObj = DateTime.parse(dateKey);
-      final dateHeaderText = DateFormat('EEE, MMM d, yyyy').format(dateObj);
-
+      final dateHeaderText = DateFormat('EEEE, dd MMMM yyyy').format(dateObj);
       items.add(_ListItem(dateString: dateHeaderText));
 
       for (final meeting in groupedByDate[dateKey]!) {
@@ -128,7 +182,7 @@ class MeetingsScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          student?.name ?? 'Unknown student',
+                          student?.name ?? 'Deleted student',
                           style: CupertinoTheme.of(context)
                               .textTheme
                               .textStyle
@@ -209,6 +263,30 @@ class MeetingsScreen extends StatelessWidget {
     );
   }
 }
+
+Widget _noMeetingsFound() {
+  return Center(
+    child: Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Icon(CupertinoIcons.search),
+        Text(
+          'No meetings found.',
+          style: TextStyle(
+            fontSize: 25,
+          ),
+        ),
+        Text(
+          'Try to change filters.',
+          style: TextStyle(
+            fontSize: 15,
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
 
 class _ListItem {
   final String? dateString;

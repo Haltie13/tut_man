@@ -7,6 +7,7 @@ import 'package:tutoring_management/model/meeting_provider.dart';
 import 'package:tutoring_management/model/student_provider.dart';
 import 'package:tutoring_management/screens/home_screen.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:tutoring_management/utils/calendar_manager.dart';
 import 'package:tutoring_management/utils/get_device_tz_location.dart';
 import 'package:tutoring_management/utils/settings_provider.dart';
 
@@ -19,6 +20,8 @@ void main() async {
   await studentProvider.addExampleStudents();
   final settingsProvider = SettingsProvider();
   await settingsProvider.loadSettings();
+  final meetingProvider = MeetingProvider();
+  await meetingProvider.addExampleMeetings();
 
   runApp(MultiProvider(
     providers: [

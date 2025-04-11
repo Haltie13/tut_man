@@ -35,23 +35,29 @@ class StudentProvider extends ChangeNotifier {
     await loadStudents();
   }
 
-  Future<void> delete(int id) async {
+  Future<void> delete(int? id) async {
+    if (id==null) return;
     final db = await _dbHelper.database;
     await db.delete('Student', where: 'id = ?', whereArgs: [id]);
     await loadStudents();
   }
 
-  Student? getStudent(int id) {
+  Student? getStudent(int? id) {
     try {
+      if (id == null) return null;
       return _students.firstWhere((s) => s.id == id);
     } catch (e) {
       return null;
     }
   }
+
   Future<void> addExampleStudents() async {
-    await addOrUpdate(Student(name: 'Alice', pricePerHour: Decimal.parse('25.0')));
-    await addOrUpdate(Student(name: 'Bob', pricePerHour: Decimal.parse('70.0')));
-    await addOrUpdate(Student(name: 'Charlie', pricePerHour: Decimal.parse('90.0')));
+    await addOrUpdate(
+        Student(name: 'Alice', pricePerHour: Decimal.parse('65.0')));
+    await addOrUpdate(
+        Student(name: 'Bob', pricePerHour: Decimal.parse('70.0')));
+    await addOrUpdate(
+        Student(name: 'Charlie', pricePerHour: Decimal.parse('90.0')));
     await loadStudents();
     print('Example students added');
   }

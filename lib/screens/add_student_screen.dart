@@ -50,8 +50,13 @@ class _AddStudentScreenState extends State<AddStudentScreen> {
         pricePerHour: price,
       );
       studentProvider.addOrUpdate(student);
-      Navigator.of(context).pop();
     }
+  }
+
+  void _deleteStudent() {
+    final studentProvider =
+        Provider.of<StudentProvider>(context, listen: false);
+    studentProvider.delete(_id);
   }
 
   @override
@@ -62,20 +67,28 @@ class _AddStudentScreenState extends State<AddStudentScreen> {
             Text(widget.student != null ? 'Edit Student' : 'Add New Student'),
         trailing: CupertinoButton(
           padding: EdgeInsets.zero,
-          onPressed: _saveStudent,
+          onPressed: () {
+            _saveStudent();
+            Navigator.of(context).pop();
+          },
           child: const Text('Save'),
         ),
       ),
       child: SafeArea(
         child: Form(
           key: _formKey,
-          child: CupertinoFormSection.insetGrouped(
-            header: const Text('Student'),
-            children: [
-              _buildNameRow(),
-              _buildPriceRow(),
-            ],
-          ),
+          child: Column(children: [
+            Expanded(
+              child: CupertinoFormSection.insetGrouped(
+                header: const Text('Student'),
+                children: [
+                  _buildNameRow(),
+                  _buildPriceRow(),
+                ],
+              ),
+            ),
+            _buildDeleteButton(),
+          ]),
         ),
       ),
     );
@@ -111,11 +124,50 @@ class _AddStudentScreenState extends State<AddStudentScreen> {
       },
       onChanged: (value) {
         if (value.isNotEmpty) {
-          final cleanValue =
-              value.replaceAll(RegExp(r'[^0-9,]'), '').replaceAll(',', '.');
-          
+          final cleanValue = value.replaceAll(',', '.');
+          _priceController.text = cleanValue;
         }
       },
+    );
+  }
+
+  Widget _buildDeleteButton() {
+    return CupertinoButton(
+      onPressed: () async {
+        final bool? confirmed = await showCupertinoDialog<bool>(
+          context: context,
+          builder: (BuildContext context) {
+            return CupertinoAlertDialog(
+              title: const Text('Delete student'),
+              content: const Text('Are you sure you want to delete this student? This action cannot be undone.'),
+              actions: [
+                CupertinoDialogAction(
+                  isDefaultAction: true,
+                  onPressed: () {
+                    Navigator.pop(context, false);
+                  },
+                  child: const Text('No'),
+                ),
+                CupertinoDialogAction(
+                  isDestructiveAction: true,
+                  onPressed: () {
+                    Navigator.pop(context, true);
+                  },
+                  child: const Text('Yes'),
+                ),
+              ],
+            );
+          },
+        );
+        if (confirmed == true) {
+          _deleteStudent();
+          Navigator.of(context).pop();
+        }
+      },
+      child: const Text(
+        'Delete',
+        style: TextStyle(color: CupertinoColors.destructiveRed),
+      ),
     );
   }
 }

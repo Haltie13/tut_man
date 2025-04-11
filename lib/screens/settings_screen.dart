@@ -1,9 +1,11 @@
+import 'package:device_calendar/device_calendar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tutoring_management/utils/settings_provider.dart';
 import '../custom_widgets/custom_text_button.dart';
+import '../utils/calendar_manager.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({Key? key}) : super(key: key);
@@ -13,9 +15,9 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenPage extends State<SettingsScreen> {
-
   @override
   Widget build(BuildContext context) {
+    CalendarManager calendarManager = CalendarManager();
     return CupertinoPageScaffold(
       navigationBar: const CupertinoNavigationBar(
         middle: Text('Settings'),
@@ -36,7 +38,8 @@ class _SettingsScreenPage extends State<SettingsScreen> {
                       child: CustomTextButton(
                         padding: const EdgeInsets.symmetric(
                             horizontal: 12, vertical: 6),
-                        onPressed: () => _showDurationDialog(context, settingsProvider),
+                        onPressed: () =>
+                            _showDurationDialog(context, settingsProvider),
                         text: '${settingsProvider.durationInterval} min',
                       ),
                     ),
@@ -48,8 +51,35 @@ class _SettingsScreenPage extends State<SettingsScreen> {
                       child: CustomTextButton(
                         padding: const EdgeInsets.symmetric(
                             horizontal: 12, vertical: 6),
-                        onPressed: () => _showCurrencyDialog(context, settingsProvider),
+                        onPressed: () =>
+                            _showCurrencyDialog(context, settingsProvider),
                         text: settingsProvider.currency,
+                      ),
+                    ),
+                    CupertinoFormRow(
+                      prefix: Text(
+                        'Calendar',
+                        style: CupertinoTheme.of(context).textTheme.textStyle,
+                      ),
+                      child: FutureBuilder<String?>(
+                        future: calendarManager
+                            .getCalendarName(settingsProvider.calendarId),
+                        builder: (context, snapshot) {
+                          String displayText =
+                              snapshot.hasData && snapshot.data != null
+                                  ? snapshot.data!
+                                  : 'Select Calendar';
+                          if (displayText.length > 20) {
+                            displayText = '${displayText.substring(0, 20)}...';
+                          }
+                          return CustomTextButton(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 6),
+                            onPressed: () =>
+                                _showCalendarPicker(context, settingsProvider),
+                            text: displayText,
+                          );
+                        },
                       ),
                     ),
                   ],
@@ -62,7 +92,8 @@ class _SettingsScreenPage extends State<SettingsScreen> {
     );
   }
 
-  Future<void> _showDurationDialog(BuildContext context, SettingsProvider settingsProvider) async {
+  Future<void> _showDurationDialog(
+      BuildContext context, SettingsProvider settingsProvider) async {
     int durationInterval = settingsProvider.durationInterval;
     final controller = TextEditingController(text: durationInterval.toString());
     final newDuration = await showCupertinoDialog<int>(
@@ -101,7 +132,8 @@ class _SettingsScreenPage extends State<SettingsScreen> {
     if (newDuration != null) settingsProvider.setDurationInterval(newDuration);
   }
 
-  Future<void> _showCurrencyDialog(BuildContext context, SettingsProvider settingsProvider) async {
+  Future<void> _showCurrencyDialog(
+      BuildContext context, SettingsProvider settingsProvider) async {
     String currency = settingsProvider.currency;
     final controller = TextEditingController(text: currency);
     final newCurrency = await showCupertinoDialog<String>(
@@ -139,5 +171,79 @@ class _SettingsScreenPage extends State<SettingsScreen> {
       ),
     );
     if (newCurrency != null) settingsProvider.setCurrency(newCurrency);
+  }
+
+  Future<void> _showCalendarPicker(
+    BuildContext context,
+    SettingsProvider settingsProvider,
+  ) async {
+    final cm = CalendarManager();
+    final calendars = await cm.getCalendars();
+
+    if (calendars == null || calendars.isEmpty) {
+      showCupertinoDialog(
+        context: context,
+        builder: (context) => CupertinoAlertDialog(
+          title: const Text('No Calendars'),
+          content: const Text('No writable calendars found on your device.'),
+          actions: [
+            CupertinoDialogAction(
+              child: const Text('OK'),
+              onPressed: () => Navigator.pop(context),
+            ),
+          ],
+        ),
+      );
+      return;
+    }
+
+    int selectedIndex = 0;
+    if (settingsProvider.calendarId != null) {
+      selectedIndex = calendars.indexWhere(
+        (cal) => cal.id == settingsProvider.calendarId,
+      );
+      if (selectedIndex == -1) selectedIndex = 0;
+    }
+
+    showCupertinoModalPopup(
+      context: context,
+      builder: (context) => Container(
+        height: 260,
+        color: CupertinoColors.systemBackground.resolveFrom(context),
+        child: Column(
+          children: [
+            CupertinoButton(
+              child: const Text('Select'),
+              onPressed: () async {
+                final selectedCalendar = calendars[selectedIndex];
+                await settingsProvider.setCalendar(selectedCalendar.id!);
+                print('Selected Calendar${selectedCalendar.id!}');
+                print('Settings calendar${settingsProvider.calendarId}');
+                Navigator.pop(context);
+              },
+            ),
+            SizedBox(
+              height: 200,
+              child: CupertinoPicker(
+                scrollController:
+                    FixedExtentScrollController(initialItem: selectedIndex),
+                itemExtent: 40,
+                onSelectedItemChanged: (index) {
+                  selectedIndex = index;
+                },
+                children: calendars.map((calendar) {
+                  return Center(
+                    child: Text(
+                      calendar.name ?? 'Unnamed Calendar',
+                      style: const TextStyle(fontSize: 16),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
