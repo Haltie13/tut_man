@@ -77,11 +77,6 @@ Example meetings will appear after adding one custom one.
   <img src="Assets/Screenshot5.png" width="30%" />
   <img src="Assets/Screenshot6.png" width="30%" />
 </p>
-<p align="center">
-  <img src="Assets/Screenshot4.png" width="30%" />
-  <img src="Assets/Screenshot5.png" width="30%" />
-  <img src="Assets/Screenshot6.png" width="30%" />
-</p>
 
 
 
