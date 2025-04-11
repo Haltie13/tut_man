@@ -31,7 +31,7 @@ class DatabaseHelper {
       CREATE TABLE Student(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
-        pricePerHour REAL NOT NULL
+        pricePerHour TEXT NOT NULL
       )
     ''');
 
@@ -41,9 +41,10 @@ class DatabaseHelper {
         startTime TEXT NOT NULL,
         duration INTEGER NOT NULL,
         eventId TEXT,
+        calendarId TEXT,
         studentId INTEGER NOT NULL,
         price TEXT NOT NULL,
-        payed INTEGER NOT NULL,
+        paid INTEGER NOT NULL,
         description TEXT,
         FOREIGN KEY(studentId) REFERENCES Student(id)
       )

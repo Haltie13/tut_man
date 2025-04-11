@@ -47,5 +47,7 @@
 	<true/>
 	<key>NSCalendarsFullAccessUsageDescription</key>
     <string>Access most functions for calendar viewing and editing.</string>
+    <key>NSCalendarsUsageDescription</key>
+    <string>Need calendar access to create meeting events</string>
 </dict>
 </plist>

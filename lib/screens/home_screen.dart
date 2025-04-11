@@ -1,11 +1,10 @@
 import 'package:flutter/cupertino.dart';
-import 'package:tutoring_management/add_event_example.dart';
-import 'package:tutoring_management/screens/add_meeting_screen.dart';
-import 'package:tutoring_management/screens/test_button.dart';
-import '/model/meeting.dart';
+import 'package:tutoring_management/screens/settings_screen.dart';
+import 'package:tutoring_management/screens/students_screen.dart';
 import 'meetings_screen.dart';
 
 class HomeScreen extends StatelessWidget {
+  const HomeScreen({Key? key}) : super(key: key);
   @override
   Widget build(BuildContext context) {
     return CupertinoTabScaffold(
@@ -16,8 +15,8 @@ class HomeScreen extends StatelessWidget {
                 label: 'Meetings'
             ),
             BottomNavigationBarItem(
-                icon: Icon(CupertinoIcons.plus),
-                label: 'Add'
+                icon: Icon(CupertinoIcons.rectangle_stack_person_crop_fill),
+                label: 'Students'
             ),
             BottomNavigationBarItem(
                 icon: Icon(CupertinoIcons.settings),
@@ -30,9 +29,9 @@ class HomeScreen extends StatelessWidget {
           case 0:
             return MeetingsScreen();
           case 1:
-            return AddMeetingScreen();
+            return StudentsScreen();
           default:
-            return TestButtonScreen();
+            return SettingsScreen();
         }
       },
     );
