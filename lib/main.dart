@@ -1,13 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
-import 'package:timezone/data/latest.dart' as tz_data;
-import 'package:timezone/timezone.dart' as tz;
 import 'package:tutoring_management/model/database_helper.dart';
 import 'package:tutoring_management/model/meeting_provider.dart';
 import 'package:tutoring_management/model/student_provider.dart';
 import 'package:tutoring_management/screens/home_screen.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:tutoring_management/utils/calendar_manager.dart';
 import 'package:tutoring_management/utils/get_device_tz_location.dart';
 import 'package:tutoring_management/utils/settings_provider.dart';
 

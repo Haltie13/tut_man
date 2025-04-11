@@ -1,12 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tutoring_management/model/meeting_provider.dart';
 import 'package:tutoring_management/model/student_provider.dart';
 import 'package:tutoring_management/screens/add_meeting_screen.dart';
 import 'package:tutoring_management/utils/settings_provider.dart';
-import '../model/student.dart';
 import '/model/meeting.dart';
 
 class MeetingsScreen extends StatelessWidget {

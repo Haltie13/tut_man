@@ -1,8 +1,6 @@
-import 'package:device_calendar/device_calendar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tutoring_management/utils/settings_provider.dart';
 import '../custom_widgets/custom_text_button.dart';
 import '../utils/calendar_manager.dart';
