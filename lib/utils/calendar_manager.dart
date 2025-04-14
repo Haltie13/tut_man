@@ -1,8 +1,6 @@
 import 'package:device_calendar/device_calendar.dart';
 import 'package:flutter/foundation.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:tutoring_management/utils/settings_provider.dart';
 
 class CalendarManager {
   final DeviceCalendarPlugin _plugin = DeviceCalendarPlugin(shouldInitTimezone: false);

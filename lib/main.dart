@@ -1,6 +1,5 @@
 import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
-import 'package:tutoring_management/model/database_helper.dart';
 import 'package:tutoring_management/model/meeting_provider.dart';
 import 'package:tutoring_management/model/student_provider.dart';
 import 'package:tutoring_management/screens/home_screen.dart';
