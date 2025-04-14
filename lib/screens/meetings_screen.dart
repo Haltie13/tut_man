@@ -102,7 +102,7 @@ class MeetingsScreen extends StatelessWidget {
 
   Widget _meetingsList(BuildContext context, List<Meeting> meetings,
       StudentProvider studentProvider, String currency) {
-    meetings.sort((a, b) => a.startTime.compareTo(b.startTime));
+    meetings.sort((a, b) => b.startTime.compareTo(a.startTime));
 
     final Map<String, List<Meeting>> groupedByDate = {};
     for (final meeting in meetings) {
@@ -112,7 +112,7 @@ class MeetingsScreen extends StatelessWidget {
     }
 
     final sortedDateKeys = groupedByDate.keys.toList()
-      ..sort((a, b) => a.compareTo(b));
+      ..sort((a, b) => b.compareTo(a));
 
     final List<_ListItem> items = [];
 

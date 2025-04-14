@@ -132,7 +132,7 @@ class _AddMeetingScreenState extends State<AddMeetingScreen> {
     });
   }
 
-  void _saveMeeting() async {
+  Future<bool> _saveMeeting() async {
     if (studentId == -1) {
       showCupertinoDialog(
         context: context,
@@ -145,7 +145,7 @@ class _AddMeetingScreenState extends State<AddMeetingScreen> {
           ],
         ),
       );
-      return;
+      return false;
     }
 
     final meetingProvider =
@@ -183,10 +183,10 @@ class _AddMeetingScreenState extends State<AddMeetingScreen> {
         description: description);
 
     meetingProvider.addOrUpdate(meeting);
-    Navigator.of(context).pop();
+    return true;
   }
 
-  Future<void> _deleteMeeting() async {
+  void _deleteMeeting() async {
     if (meetingId == null) return;
 
     if (eventId != null) {
@@ -199,6 +199,7 @@ class _AddMeetingScreenState extends State<AddMeetingScreen> {
     final meetingProvider =
         Provider.of<MeetingProvider>(context, listen: false);
     await meetingProvider.delete(meetingId!);
+
   }
 
   @override
@@ -209,7 +210,11 @@ class _AddMeetingScreenState extends State<AddMeetingScreen> {
             Text(widget.meeting == null ? "Add New Meeting" : "Edit Meeting"),
         trailing: CupertinoButton(
           padding: EdgeInsets.zero,
-          onPressed: _saveMeeting,
+          onPressed: () async {
+            if (await _saveMeeting()) {
+              Navigator.of(context).pop();
+            }
+            },
           child: const Text('Save'),
         ),
       ),
@@ -476,7 +481,7 @@ class _AddMeetingScreenState extends State<AddMeetingScreen> {
 
   Widget _buildPaymentStatusRow() {
     return CupertinoFormRow(
-      prefix: const Text('Payed'),
+      prefix: const Text('Paid'),
       child: CupertinoCheckbox(
         value: iSPaid,
         onChanged: (bool? value) => setState(() => iSPaid = value ?? false),

@@ -1,22 +1,11 @@
 import 'package:device_calendar/device_calendar.dart';
 import 'package:flutter/foundation.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:tutoring_management/utils/settings_provider.dart';
 
 class CalendarManager {
   final DeviceCalendarPlugin _plugin = DeviceCalendarPlugin(shouldInitTimezone: false);
 
   CalendarManager();
-
-  Future<bool> _checkAndRequestPermissions() async {
-    final status = await Permission.calendar.status;
-    if (!status.isGranted) {
-      final result = await Permission.calendar.request();
-      return result.isGranted;
-    }
-    return true;
-  }
 
   Future<List<String?>?> addEventToCalendar({
     required String title,
@@ -26,10 +15,9 @@ class CalendarManager {
     String? calendarId,
   }) async {
     try {
-      final hasPermissions2 = await _hasPermissions();
-      if (!hasPermissions2) {
-        final hasPermissions = await _checkAndRequestPermissions();
-        if (!hasPermissions) return null;
+      final hasPermissions = await _hasPermissions();
+      if (!hasPermissions) {
+        return null;
       }
 
       String targetCalendarId;
@@ -112,6 +100,11 @@ class CalendarManager {
     }
   }
 
+  Future<void> requestPermissions() async {
+    final hasPermissions = await _hasPermissions();
+    if (!hasPermissions) return;
+  }
+
   Future<bool> _hasPermissions() async {
     final permissions = await _plugin.hasPermissions();
     if (permissions.data != true) {
@@ -120,6 +113,7 @@ class CalendarManager {
     }
     return true;
   }
+
 
   Future<List<Calendar>?> getCalendars() async {
     try {

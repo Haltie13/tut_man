@@ -1,6 +1,5 @@
 import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
-import 'package:tutoring_management/model/database_helper.dart';
 import 'package:tutoring_management/model/meeting_provider.dart';
 import 'package:tutoring_management/model/student_provider.dart';
 import 'package:tutoring_management/screens/home_screen.dart';
@@ -11,22 +10,21 @@ import 'package:tutoring_management/utils/settings_provider.dart';
 void main() async {
   await initializeAppTimezones();
   WidgetsFlutterBinding.ensureInitialized();
-  final DatabaseHelper db = DatabaseHelper();
-  await db.resetDB();
-  final studentProvider = StudentProvider();
-  await studentProvider.addExampleStudents();
   final settingsProvider = SettingsProvider();
   await settingsProvider.loadSettings();
+
   final meetingProvider = MeetingProvider();
-  await meetingProvider.addExampleMeetings();
+  await meetingProvider.loadMeetings();
+  final studentProvider = StudentProvider();
+  await studentProvider.loadStudents();
 
   runApp(MultiProvider(
     providers: [
       ChangeNotifierProvider<StudentProvider>(
-        create: (_) => StudentProvider(),
+        create: (_) => studentProvider,
       ),
       ChangeNotifierProvider<MeetingProvider>(
-        create: (_) => MeetingProvider(),
+        create: (_) => meetingProvider,
       ),
       ChangeNotifierProvider<SettingsProvider>(
         create: (_) => settingsProvider,

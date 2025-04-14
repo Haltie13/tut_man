@@ -36,7 +36,7 @@ class _AddStudentScreenState extends State<AddStudentScreen> {
     super.dispose();
   }
 
-  void _saveStudent() {
+  bool _saveStudent() {
     if (_formKey.currentState!.validate()) {
       final price = Decimal.parse(
         _priceController.text.replaceAll(',', '.'),
@@ -50,7 +50,9 @@ class _AddStudentScreenState extends State<AddStudentScreen> {
         pricePerHour: price,
       );
       studentProvider.addOrUpdate(student);
+      return true;
     }
+    return false;
   }
 
   void _deleteStudent() {
@@ -68,8 +70,8 @@ class _AddStudentScreenState extends State<AddStudentScreen> {
         trailing: CupertinoButton(
           padding: EdgeInsets.zero,
           onPressed: () {
-            _saveStudent();
-            Navigator.of(context).pop();
+            if(_saveStudent())
+              Navigator.of(context).pop();
           },
           child: const Text('Save'),
         ),
