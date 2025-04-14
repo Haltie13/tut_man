@@ -177,6 +177,8 @@ class _SettingsScreenPage extends State<SettingsScreen> {
   ) async {
     final cm = CalendarManager();
     final calendars = await cm.getCalendars();
+    final calendarManager = CalendarManager();
+    calendarManager.requestPermissions();
 
     if (calendars == null || calendars.isEmpty) {
       showCupertinoDialog(
