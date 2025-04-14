@@ -9,8 +9,6 @@ class CalendarManager {
 
   CalendarManager();
 
-
-
   Future<List<String?>?> addEventToCalendar({
     required String title,
     required TZDateTime startTime,
