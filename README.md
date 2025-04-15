@@ -65,18 +65,21 @@ flutter pub get
 flutter run
 ```
 Follow Flutter instructions if you encounter any setup issues.
-Example meetings will appear after adding one custom one.
 
 <p align="center">
-  <img src="Assets/Screenshot1.png" width="30%" />
-  <img src="Assets/Screenshot2.png" width="30%" />
-  <img src="Assets/Screenshot3.png" width="30%" />
+  <img src="assets/screenshots/screenshot1.PNG" width="30%" />
+  <img src="assets/screenshots/screenshot2.PNG" width="30%" />
+  <img src="assets/screenshots/screenshot3.PNG" width="30%" />
 </p>
 <p align="center">
-  <img src="Assets/Screenshot4.png" width="30%" />
-  <img src="Assets/Screenshot5.png" width="30%" />
-  <img src="Assets/Screenshot6.png" width="30%" />
+  <img src="assets/screenshots/screenshot4.PNG" width="30%" />
+  <img src="assets/screenshots/screenshot5.PNG" width="30%" />
+  <img src="assets/screenshots/screenshot6.PNG" width="30%" />
 </p>
+<p align="center">
+  <img src="assets/screenshots/screenshot7.PNG" width="30%" />
+</p>
+
 
 
 
