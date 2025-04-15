@@ -30,6 +30,15 @@ class MeetingProvider extends ChangeNotifier {
     } else {
       _activeFilters.remove(MeetingFilter.all);
 
+      if (_activeFilters.contains(filter)) {
+        _activeFilters.remove(filter);
+        if (_activeFilters.isEmpty) {
+          _activeFilters = [MeetingFilter.all];
+        }
+        notifyListeners();
+        return;
+      }
+
       if (filter == MeetingFilter.paid || filter == MeetingFilter.unpaid) {
         _activeFilters.remove(MeetingFilter.paid);
         _activeFilters.remove(MeetingFilter.unpaid);
