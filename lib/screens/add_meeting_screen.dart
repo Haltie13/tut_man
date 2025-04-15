@@ -16,6 +16,7 @@ import 'package:decimal/decimal.dart';
 import 'package:intl/intl.dart';
 
 import '../utils/get_device_tz_location.dart';
+import '../utils/settings_provider.dart';
 
 class AddMeetingScreen extends StatefulWidget {
   final Meeting? meeting;
@@ -83,8 +84,8 @@ class _AddMeetingScreenState extends State<AddMeetingScreen> {
   Future<void> _loadSettings() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
-      currency = prefs.getString('currency') ?? 'PLN';
-      durationInterval = prefs.getInt('durationInterval') ?? 15;
+      currency = prefs.getString('currency') ?? SettingsProvider.defaultCurrency;
+      durationInterval = prefs.getInt('durationInterval') ?? SettingsProvider.defaultDurationInterval;
       if (widget.meeting == null) {
         duration = durationInterval;
       }

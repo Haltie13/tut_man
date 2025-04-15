@@ -14,8 +14,11 @@ void main() async {
   await settingsProvider.loadSettings();
 
   final meetingProvider = MeetingProvider();
+  await meetingProvider.addExampleMeetings();
   await meetingProvider.loadMeetings();
+
   final studentProvider = StudentProvider();
+  await studentProvider.addExampleStudents();
   await studentProvider.loadStudents();
 
   runApp(MultiProvider(

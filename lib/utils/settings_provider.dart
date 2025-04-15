@@ -8,8 +8,8 @@ class SettingsProvider with ChangeNotifier {
   int _durationInterval = 30;
   String? _calendarId;
 
-  String defaultCurrency = 'PLN';
-  int defaultDurationInterval = 30;
+  static String defaultCurrency = 'PLN';
+  static int defaultDurationInterval = 30;
 
 
   String get currency => _currency;
