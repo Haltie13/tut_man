@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:tutoring_management/utils/export_db_to_file.dart';
 import 'package:tutoring_management/utils/settings_provider.dart';
 import '../custom_widgets/custom_text_button.dart';
 import '../utils/calendar_manager.dart';
@@ -78,6 +79,32 @@ class _SettingsScreenPage extends State<SettingsScreen> {
                             text: displayText,
                           );
                         },
+                      ),
+                    ),
+                    CupertinoFormRow(
+                      prefix: Text(
+                        'Export',
+                        style: CupertinoTheme.of(context).textTheme.textStyle,
+                      ),
+                      child: CupertinoButton(
+                        onPressed: () async {
+                          await ExportDbToFile.exportDatabaseToJson(context);
+                        },
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        child: Icon(CupertinoIcons.share),
+                      ),
+                    ),
+                    CupertinoFormRow(
+                      prefix: Text(
+                        'Import',
+                        style: CupertinoTheme.of(context).textTheme.textStyle,
+                      ),
+                      child: CupertinoButton(
+                        onPressed: () async {
+                          await ExportDbToFile.importFromJson(context);
+                        },
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        child: Icon(CupertinoIcons.archivebox),
                       ),
                     ),
                   ],

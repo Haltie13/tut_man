@@ -49,5 +49,16 @@
     <string>Access most functions for calendar viewing and editing.</string>
     <key>NSCalendarsUsageDescription</key>
     <string>Need calendar access to create meeting events</string>
+    <key>CFBundleDocumentTypes</key>
+    <array>
+      <dict>
+        <key>CFBundleTypeName</key>
+        <string>JSON Document</string>
+        <key>LSItemContentTypes</key>
+        <array>
+          <string>public.json</string>
+        </array>
+      </dict>
+    </array>
 </dict>
 </plist>
